@@ -12,32 +12,33 @@ import java.util.Arrays;
 public class StackImplementation {
     private Character[] arr;
     private final int initialSize = 10;
-    private int topIndex = -1;
+    private int topElementIndex = -1;
 
     public StackImplementation() {
         this.arr = new Character[initialSize];
     }
 
-    public void push(Character c) {
-        if(topIndex >= arr.length) {
+    public void push(char c) {
+        if (topElementIndex >= arr.length - 1){
             arr = Arrays.copyOf(arr, arr.length + initialSize);
         }
-        arr[++topIndex] = c;
+        arr[++topElementIndex] = c;
     }
 
     public Character peek() {
-        if (topIndex == -1) {
+        if(topElementIndex==-1) {
             return null;
         }
-        return arr[topIndex];
+        return arr[topElementIndex];
     }
 
     public Character pop() {
-        if (topIndex == -1) {
+        if(topElementIndex==-1) {
             return null;
         }
-        var topElement = arr[topIndex];
-        topIndex--;
+        var topElement = arr[topElementIndex];
+        arr[topElementIndex] = null;
+        topElementIndex--;
         return topElement;
     }
 }

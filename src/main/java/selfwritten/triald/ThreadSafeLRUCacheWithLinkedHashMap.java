@@ -3,10 +3,10 @@ package selfwritten.triald;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class LRUCacheWithLinkedHashMap {
+public class ThreadSafeLRUCacheWithLinkedHashMap {
     private final Map<Integer, Integer> cache;
 
-    public LRUCacheWithLinkedHashMap(int initialCapacity) {
+    public ThreadSafeLRUCacheWithLinkedHashMap(int initialCapacity) {
         this.cache = new LinkedHashMap<>(initialCapacity, 0.75f, true){
             @Override
             public boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest){

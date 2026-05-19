@@ -28,4 +28,41 @@ public class StackProblems {
         }
         return stack.isEmpty();
     }
+
+    public String decodeString(String str) {
+        Stack<Character> stack = new Stack<>();
+        for (char c: str.toCharArray()) {
+            stack.push(c);
+        }
+        StringBuilder mainStringBuilder = new StringBuilder();
+        StringBuilder subStringBuilder = new StringBuilder();
+        while (!stack.isEmpty()){
+            var c = stack.pop();
+            if (closeParentheses.contains(c)){
+                mainStringBuilder.append(subStringBuilder.toString().trim());
+                subStringBuilder = new StringBuilder();
+            } else if (openParentheses.contains(c)){
+                continue;
+            } else if(Character.isDigit(c)){
+                var subString = subStringBuilder.toString().trim();
+                subStringBuilder = new StringBuilder();
+
+                StringBuilder counterSb = new StringBuilder();
+                counterSb.append(c);
+                while(!stack.isEmpty() && Character.isDigit(stack.peek())){
+                    counterSb.append(stack.pop());
+                }
+                var multiplier = counterSb.reverse().toString().trim();
+
+
+                for (int i=1; i<=Integer.parseInt(multiplier); i++){
+                    subStringBuilder.append(subString);
+                }
+            } else {
+                subStringBuilder.append(c);
+            }
+        }
+        mainStringBuilder.append(subStringBuilder.toString().trim());
+       return mainStringBuilder.reverse().toString().trim();
+    }
 }
