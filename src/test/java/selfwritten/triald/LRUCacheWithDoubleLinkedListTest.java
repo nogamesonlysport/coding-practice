@@ -2,13 +2,21 @@ package selfwritten.triald;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.function.BiConsumer;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class LRUCacheWithDoubleLinkedListTest {
     @Test
     public void testLinkedHashSetLRUCache(){
-        var cache = new LRUCacheWithDoubleLinkedList(3);
+        BiConsumer<Integer, Integer> evictionListener = new BiConsumer<Integer, Integer>() {
+            @Override
+            public void accept(Integer key, Integer value) {
+                System.out.println("Evicted: " + key + " -> " + value);
+            }
+        };
+        var cache = new LRUCacheWithDoubleLinkedList(3, evictionListener);
         cache.put(1, 10);
         cache.put(2, 20);
         cache.put(3, 30);

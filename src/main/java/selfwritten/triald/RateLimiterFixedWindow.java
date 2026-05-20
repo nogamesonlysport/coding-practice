@@ -2,38 +2,42 @@ package selfwritten.triald;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class RateLimiterFixedWindow {
-    private int maxRequests;
-    private long windowSizeInMs;
-    private ConcurrentHashMap<String, Window> clientWindows = new ConcurrentHashMap<>();
+    private final int maxWindowCount;
+    private final long windowLengthInMillis;
+    private final Map<String, Window> windowMap = new HashMap<>();
 
-    public RateLimiterFixedWindow(int maxRequests, long windowSizeInMs) {
-        this.maxRequests = maxRequests;
-        this.windowSizeInMs = windowSizeInMs;
+    public boolean allowRequest(String client) {
+        var clientWindow = windowMap.computeIfAbsent(client, k -> new Window());
+
+        var now = System.currentTimeMillis();
+        if (now - clientWindow.windowStartTimeInMillis.get() >= windowLengthInMillis) {
+            windowMap.put(client, new Window(new AtomicInteger(1)));
+            return true;
+        } else if (clientWindow.windowCount.get() < maxWindowCount){
+            clientWindow.windowCount.incrementAndGet();
+            return true;
+        }
+        return false;
     }
 
-    private static class Window{
-        private AtomicInteger counter = new AtomicInteger(0);
-        private AtomicLong windowStartTimestamp = new AtomicLong(System.currentTimeMillis());
+    public RateLimiterFixedWindow(int maxWindowCount, long windowLengthInMillis) {
+        this.maxWindowCount = maxWindowCount;
+        this.windowLengthInMillis = windowLengthInMillis;
     }
 
-    public boolean allowRequest(String clientId) {
-        Window clientWindow = clientWindows.computeIfAbsent(clientId, k -> new Window());
+    private class Window {
+        private AtomicInteger windowCount = new AtomicInteger(0);
+        private AtomicLong windowStartTimeInMillis = new AtomicLong(System.currentTimeMillis());
 
-        //if the current timestamp is beyond the client window, reset the window
-        long now = System.currentTimeMillis();
-        if (now - clientWindow.windowStartTimestamp.get() >= windowSizeInMs) {
-            clientWindow = new Window();
+        public Window() {
         }
-        var currentCount = clientWindow.counter.get();
-        if (currentCount >= maxRequests) {
-            return false;
+
+        public Window(AtomicInteger windowCount) {
+            this.windowCount = windowCount;
         }
-        currentCount = clientWindow.counter.incrementAndGet();
-        return currentCount <= maxRequests;
     }
 }

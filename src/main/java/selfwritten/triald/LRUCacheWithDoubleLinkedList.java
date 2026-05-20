@@ -2,6 +2,7 @@ package selfwritten.triald;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * LRU - Least Recently Used is a caching strategy that keeps a fixed
@@ -17,11 +18,19 @@ public class LRUCacheWithDoubleLinkedList {
     private Node tail;
     private int size;
     private Map<Integer, Node> pointerMap = new HashMap<>();
+    private BiConsumer<Integer, Integer> evictionListener;
 
     public LRUCacheWithDoubleLinkedList(int size) {
         this.size = size;
         head = null;
         tail = null;
+    }
+
+    public LRUCacheWithDoubleLinkedList(int size, BiConsumer<Integer, Integer> evictionListener) {
+        this.size = size;
+        head = null;
+        tail = null;
+        this.evictionListener = evictionListener;
     }
 
     public void put(int key, int value) {
@@ -39,6 +48,9 @@ public class LRUCacheWithDoubleLinkedList {
             //cache is full - remove the LRU element
             //remove LRU from the pointerMap
             pointerMap.remove(head.getKey());
+            if (evictionListener!=null){
+                evictionListener.accept(head.getKey(), head.getData());
+            }
             head = head.getNext();
             head.setPrev(null);
         }
